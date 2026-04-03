@@ -20,3 +20,19 @@ export async function addActivity(formData: FormData) {
 
   revalidatePath(`/contacts/${contactId}`)
 }
+
+export async function createContactAction(formData: FormData) {
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
+  const email = formData.get('email') as string | null
+  const phone = formData.get('phone') as string | null
+  const companyId = (formData.get('companyId') as string) || null
+
+  if (!firstName || !lastName) throw new Error("Names are strictly required.");
+
+  await prisma.contact.create({
+    data: { firstName, lastName, email, phone, companyId }
+  })
+  
+  revalidatePath('/contacts')
+}

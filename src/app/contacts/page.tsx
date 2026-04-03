@@ -1,16 +1,20 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import CreateContactModal from './CreateContactModal'
 
 export default async function ContactsPage() {
   // Fetch contacts from the database
-  const contacts = await prisma.contact.findMany({
-    include: {
-      company: true
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
+  const [contacts, companies] = await Promise.all([
+    prisma.contact.findMany({
+      include: {
+        company: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    }),
+    prisma.company.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+  ])
 
   return (
     <div>
@@ -19,9 +23,7 @@ export default async function ContactsPage() {
           <h1 className="page-title">Contacts</h1>
           <p className="page-subtitle" style={{ marginBottom: 0 }}>Manage your customers and leads.</p>
         </div>
-        <Link href="/contacts/new" className="btn btn-primary">
-          + Add Contact
-        </Link>
+        <CreateContactModal companies={companies} />
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
