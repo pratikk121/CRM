@@ -21,7 +21,7 @@ export default async function RootLayout({
   if (!session) {
     return (
       <html lang="en">
-        <body className={inter.className}>
+        <body style={{ margin: 0, padding: 0 }}>
           {children}
         </body>
       </html>
