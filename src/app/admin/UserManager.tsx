@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { deleteUserAction, updateUserAction } from "./actions"
+import { toast } from "sonner"
 
 export default function UserManager({ users }: { users: any[] }) {
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -9,15 +10,17 @@ export default function UserManager({ users }: { users: any[] }) {
 
   async function handleDelete(id: string, email: string) {
     if (email === 'admin@crm.com') {
-      alert("Cannot delete the master system administrator.");
+      toast.error("Cannot delete the master system administrator.");
       return;
     }
     if (confirm(`SECURITY ALERT: Are you absolutely sure you want to permanently revoke system access for ${email}?`)) {
       setLoading(true)
+      toast.loading("Executing security execution...", { id: "del" })
       try {
         await deleteUserAction(id)
+        toast.success("Access permanently revoked.", { id: "del" })
       } catch (e: any) {
-        alert(e.message)
+        toast.error(e.message, { id: "del" })
       }
       setLoading(false)
     }
@@ -26,12 +29,14 @@ export default function UserManager({ users }: { users: any[] }) {
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>, id: string) {
     e.preventDefault()
     setLoading(true)
+    toast.loading("Deploying new user configurations...", { id: "update" })
     const formData = new FormData(e.currentTarget)
     try {
       await updateUserAction(id, formData)
+      toast.success("Employee profile perfectly securely modified.", { id: "update" })
       setEditingId(null) // Successfully completely, close window
     } catch (err: any) {
-      alert("Failed to update user: " + err.message)
+      toast.error("Failed to update user: " + err.message, { id: "update" })
     }
     setLoading(false)
   }

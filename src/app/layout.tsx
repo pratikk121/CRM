@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import { Toaster } from "sonner";
 
 
 
@@ -22,6 +23,7 @@ export default async function RootLayout({
     return (
       <html lang="en">
         <body style={{ margin: 0, padding: 0 }}>
+          <Toaster theme="dark" toastOptions={{ style: { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', color: '#fff' } }} position="bottom-right" />
           {children}
         </body>
       </html>
@@ -31,6 +33,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body style={{ margin: 0, padding: 0 }}>
+        <Toaster theme="dark" toastOptions={{ style: { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', color: '#fff' } }} position="bottom-right" />
         <div className="layout">
           <aside className="sidebar">
             <header style={{ marginBottom: '2rem' }}>
