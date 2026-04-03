@@ -276,3 +276,7 @@ tr:hover td {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+.search-result:hover {
+  background: rgba(255,255,255,0.05);
+}

@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { Toaster } from "sonner";
+import CommandMenu from "./CommandMenu";
 
 
 
@@ -34,6 +35,7 @@ export default async function RootLayout({
     <html lang="en">
       <body style={{ margin: 0, padding: 0 }}>
         <Toaster theme="dark" toastOptions={{ style: { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', color: '#fff' } }} position="bottom-right" />
+        <CommandMenu />
         <div className="layout">
           <aside className="sidebar">
             <header style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -53,6 +55,9 @@ export default async function RootLayout({
               )}
             </nav>
             <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
+              <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '1rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                 Press <strong style={{ color: 'var(--text-primary)', padding: '0.2rem 0.4rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>Cmd + K</strong> to search
+              </div>
               <a href="/api/auth/signout?callbackUrl=/login" className="nav-link" style={{ display: 'block', width: '100%', color: 'var(--danger-color)' }}>
                 Sign Out
               </a>
