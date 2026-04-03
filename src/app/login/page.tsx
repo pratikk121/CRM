@@ -16,22 +16,18 @@ export default function LoginPage() {
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
             <label htmlFor="email" style={{ fontSize: '0.875rem', fontWeight: 500 }}>Email</label>
-            <input type="email" id="email" name="email" defaultValue="admin@crm.com" required style={{ padding: '0.75rem', borderRadius: '0.375rem', border: '1px solid var(--border-color)', outline: 'none', backgroundColor: 'var(--bg-surface)' }} />
+            <input type="email" id="email" name="email" required style={{ padding: '0.75rem', borderRadius: '0.375rem', border: '1px solid var(--border-color)', outline: 'none', backgroundColor: 'var(--bg-surface)' }} />
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
             <label htmlFor="password" style={{ fontSize: '0.875rem', fontWeight: 500 }}>Password</label>
-            <input type="password" id="password" name="password" defaultValue="admin" required style={{ padding: '0.75rem', borderRadius: '0.375rem', border: '1px solid var(--border-color)', outline: 'none', backgroundColor: 'var(--bg-surface)' }} />
+            <input type="password" id="password" name="password" required style={{ padding: '0.75rem', borderRadius: '0.375rem', border: '1px solid var(--border-color)', outline: 'none', backgroundColor: 'var(--bg-surface)' }} />
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', padding: '0.75rem' }}>Sign In</button>
         </form>
         
-        <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-          <strong>Admin:</strong> admin@crm.com / admin<br/>
-          <strong>Sales:</strong> sales@crm.com / sales<br/>
-          <strong>Support:</strong> support@crm.com / support
-        </p>
+
       </div>
     </div>
   )
