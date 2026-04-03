@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import UserManager from "./UserManager";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -66,32 +67,7 @@ export default async function AdminPage() {
 
         <div className="card" style={{ alignSelf: 'start' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Active Personnel Database</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Provisioned On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.id}>
-                    <td>{user.name || 'Unknown'}</td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
-                    <td>
-                      <span style={{ padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: user.role === 'ADMIN' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)', color: user.role === 'ADMIN' ? 'var(--primary-color)' : 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{user.createdAt.toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <UserManager users={users} />
         </div>
       </div>
     </div>
