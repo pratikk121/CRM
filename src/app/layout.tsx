@@ -36,7 +36,7 @@ export default async function RootLayout({
             <header style={{ marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>Acme CRM</h2>
             </header>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
+            <nav className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
               <Link href="/" className="nav-link">Dashboard</Link>
               <Link href="/contacts" className="nav-link">Contacts</Link>
               <Link href="/companies" className="nav-link">Companies</Link>
