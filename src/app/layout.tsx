@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+
 import "./globals.css";
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 
-const inter = Inter({ subsets: ["latin"] });
+
 
 export const metadata: Metadata = {
   title: "CRM Application",
@@ -30,7 +30,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body style={{ margin: 0, padding: 0 }}>
         <div className="layout">
           <aside className="sidebar">
             <header style={{ marginBottom: '2rem' }}>
