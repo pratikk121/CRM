@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import UserManager from "./UserManager";
+import Link from "next/link";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -66,7 +67,10 @@ export default async function AdminPage() {
         </div>
 
         <div className="card" style={{ alignSelf: 'start' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Active Personnel Database</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Active Personnel Database</h2>
+            <Link href="/admin/audit" className="btn" style={{ padding: '0.4rem 0.8rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>View SOC2 Ledger</Link>
+          </div>
           <UserManager users={users} />
         </div>
       </div>

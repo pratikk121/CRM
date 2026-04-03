@@ -20,6 +20,7 @@ model User {
   tickets       Ticket[]
   tasks         TaskItem[]
   activities    Activity[]
+  auditLogs     AuditLog[]
 }
 
 model Company {
@@ -106,4 +107,16 @@ model Activity {
 
   contact     Contact?  @relation(fields: [contactId], references: [id])
   user        User?     @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+  details   String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
 }

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
+import { createAuditLog } from "@/lib/audit"
 
 async function requireAdmin() {
   const session = await auth()
@@ -21,7 +22,8 @@ export async function deleteUserAction(id: string) {
     throw new Error("Cannot completely delete the master administrator core account.")
   }
 
-  await prisma.user.delete({ where: { id } })
+  const deleted = await prisma.user.delete({ where: { id } })
+  await createAuditLog('DELETE', 'USER', id, `Permanently revoked structural access for ${deleted.email}`)
   revalidatePath('/admin')
 }
 
@@ -40,10 +42,12 @@ export async function updateUserAction(id: string, formData: FormData) {
     updateData.password = await bcrypt.hash(newPassword, 10)
   }
 
-  await prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id },
     data: updateData
   })
+  
+  await createAuditLog('UPDATE', 'USER', id, `Modified security or role configurations for ${updated.email}`)
   
   revalidatePath('/admin')
 }
