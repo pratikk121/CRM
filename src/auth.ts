@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET || "fallback_secret_for_crm_beta_app_1234567890",
   providers: [
     CredentialsProvider({
       name: "Credentials",
