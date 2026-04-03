@@ -48,14 +48,9 @@ export default async function RootLayout({
               )}
             </nav>
             <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
-              <form action={async () => {
-                'use server'
-                await signOut({ redirectTo: '/login' })
-              }}>
-                <button type="submit" className="nav-link" style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color)' }}>
-                  Sign Out
-                </button>
-              </form>
+              <a href="/api/auth/signout?callbackUrl=/login" className="nav-link" style={{ display: 'block', width: '100%', color: 'var(--danger-color)' }}>
+                Sign Out
+              </a>
             </div>
           </aside>
           
