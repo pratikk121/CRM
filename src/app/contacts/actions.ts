@@ -1,5 +1,6 @@
 'use server'
 
+import { createAuditLog } from '@/lib/audit'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
@@ -30,9 +31,34 @@ export async function createContactAction(formData: FormData) {
 
   if (!firstName || !lastName) throw new Error("Names are strictly required.");
 
-  await prisma.contact.create({
+  const created = await prisma.contact.create({
     data: { firstName, lastName, email, phone, companyId }
   })
   
+  await createAuditLog('CREATE', 'CONTACT', created.id, `Created contact ${firstName} ${lastName}`)
+  
   revalidatePath('/contacts')
+}
+
+export async function bulkImportContactsAction(payload: any[]) {
+  const validData = payload
+    .filter((d: any) => d.firstName && d.email)
+    .map((d: any) => ({
+      firstName: d.firstName,
+      lastName: d.lastName || '',
+      email: d.email,
+      phone: d.phone || ''
+    }))
+
+  if (validData.length === 0) throw new Error("No structurally valid rows identified in CSV stream.")
+
+  await prisma.contact.createMany({
+    data: validData,
+    skipDuplicates: true
+  })
+
+  await createAuditLog('CREATE', 'CONTACT', 'BULK', `Imported ${validData.length} tabular records via CSV IO subsystem`)
+
+  revalidatePath('/contacts')
+  revalidatePath('/')
 }

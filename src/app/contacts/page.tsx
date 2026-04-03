@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import CreateContactModal from './CreateContactModal'
+import CSVManager from './CSVManager'
 
 export default async function ContactsPage() {
   // Fetch contacts from the database
@@ -23,7 +24,10 @@ export default async function ContactsPage() {
           <h1 className="page-title">Contacts</h1>
           <p className="page-subtitle" style={{ marginBottom: 0 }}>Manage your customers and leads.</p>
         </div>
-        <CreateContactModal companies={companies} />
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <CSVManager contacts={contacts} />
+          <CreateContactModal companies={companies} />
+        </div>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
