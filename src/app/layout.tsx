@@ -46,7 +46,9 @@ export default async function RootLayout({
               <Link href="/" className="nav-link">Dashboard</Link>
               <Link href="/contacts" className="nav-link">Contacts</Link>
               <Link href="/companies" className="nav-link">Companies</Link>
-              <Link href="/pipeline" className="nav-link">Pipeline</Link>
+              {((session.user as any)?.role !== 'SUPPORT') && (
+                <Link href="/pipeline" className="nav-link">Pipeline</Link>
+              )}
               <Link href="/tasks" className="nav-link">Tasks</Link>
               <Link href="/support" className="nav-link">Support</Link>
               <Link href="/settings" className="nav-link">Settings</Link>

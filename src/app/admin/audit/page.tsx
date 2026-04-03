@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function AuditLedgerPage() {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') {
-    redirect('/');
+    redirect('/unauthorized');
   }
 
   const logs = await prisma.auditLog.findMany({
@@ -44,7 +44,7 @@ export default async function AuditLedgerPage() {
             {logs.length === 0 ? (
               <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No audit traces permanently registered yet.</td></tr>
             ) : (
-              logs.map(log => (
+              logs.map((log: any) => (
                 <tr key={log.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                    <td style={{ padding: '1rem', fontSize: '0.875rem', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{log.createdAt.toLocaleString()}</td>
                    <td style={{ padding: '1rem', fontWeight: 500, color: 'var(--primary-color)' }}>{log.user?.email || 'SYSTEM'}</td>

@@ -53,8 +53,7 @@ export async function bulkImportContactsAction(payload: any[]) {
   if (validData.length === 0) throw new Error("No structurally valid rows identified in CSV stream.")
 
   await prisma.contact.createMany({
-    data: validData,
-    skipDuplicates: true
+    data: validData
   })
 
   await createAuditLog('CREATE', 'CONTACT', 'BULK', `Imported ${validData.length} tabular records via CSV IO subsystem`)

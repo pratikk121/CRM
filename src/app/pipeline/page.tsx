@@ -2,8 +2,15 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import KanbanClient from './KanbanClient'
 import CreateDealModal from './CreateDealModal'
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
 
 export default async function PipelinePage() {
+  const session = await auth();
+  if ((session?.user as any)?.role === 'SUPPORT') {
+    redirect('/unauthorized');
+  }
+
   const [deals, contacts, companies] = await Promise.all([
     prisma.deal.findMany({ include: { company: true, contact: true }, orderBy: { createdAt: 'desc' } }),
     prisma.contact.findMany({ orderBy: { firstName: 'asc' } }),
