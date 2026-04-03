@@ -36,7 +36,8 @@ export default async function RootLayout({
         <Toaster theme="dark" toastOptions={{ style: { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', color: '#fff' } }} position="bottom-right" />
         <div className="layout">
           <aside className="sidebar">
-            <header style={{ marginBottom: '2rem' }}>
+            <header style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <img src="/logo.png" alt="Acme Branding Logo" style={{ width: '28px', height: '28px', borderRadius: '6px' }} />
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>Acme CRM</h2>
             </header>
             <nav className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>

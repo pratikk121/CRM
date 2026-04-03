@@ -1,8 +1,50 @@
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/auth"
+import Link from "next/link"
 
-export const dynamic = 'force-dynamic'; // Ensure Next.js doesn't cache the live dashboard numbers
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardHome() {
+  const session = await auth();
+
+  // If no session, intercept the database queries and return the stunning Public Landing Page!
+  if (!session) {
+    return (
+      <div style={{ backgroundColor: '#050510', color: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <header style={{ padding: '1.5rem 3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <img src="/logo.png" alt="Acme CRM Logo" style={{ width: '32px', height: '32px', borderRadius: '6px' }} />
+            <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>Acme</span>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <Link href="/login" style={{ padding: '0.5rem 1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', color: '#fff', textDecoration: 'none', fontWeight: 500, border: '1px solid rgba(255,255,255,0.1)' }}>Sign In to Workspace</Link>
+          </div>
+        </header>
+
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '4rem 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem' }}>
+             <img src="/logo.png" alt="Acme Icon" style={{ width: '90px', height: '90px', borderRadius: '20px', boxShadow: '0 0 60px rgba(99, 102, 241, 0.4)' }} />
+          </div>
+          
+          <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '1.5rem', background: 'linear-gradient(to bottom right, #ffffff, #8b5cf6)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
+            The Future of<br/>Enterprise Sales.
+          </h1>
+          
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.6)', maxWidth: '600px', marginBottom: '4rem', lineHeight: 1.6 }}>
+            Acme CRM is an ultra-high performance telemetry and operations network designed explicitly for sales teams that require extreme speed and absolute security.
+          </p>
+          
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <Link href="/login" className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '99px', boxShadow: '0 0 30px rgba(99, 102, 241, 0.5)', fontWeight: 600 }}>
+              Enter Platform &rarr;
+            </Link>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // ==== PRISMA DASHBOARD AGGREGATIONS FOR AUTHENTICATED USERS ====
   const [
     wonDeals,
     activeDealsCount,
