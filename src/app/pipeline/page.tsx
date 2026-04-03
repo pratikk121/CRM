@@ -1,12 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import KanbanClient from './KanbanClient'
+import CreateDealModal from './CreateDealModal'
 
 export default async function PipelinePage() {
-  const deals = await prisma.deal.findMany({
-    include: { company: true, contact: true },
-    orderBy: { createdAt: 'desc' }
-  })
+  const [deals, contacts, companies] = await Promise.all([
+    prisma.deal.findMany({ include: { company: true, contact: true }, orderBy: { createdAt: 'desc' } }),
+    prisma.contact.findMany({ orderBy: { firstName: 'asc' } }),
+    prisma.company.findMany({ orderBy: { name: 'asc' } })
+  ])
 
   // Group by stage (PROSPECT, QUALIFIED, PROPOSAL, WON, LOST)
   const stages = ['PROSPECT', 'QUALIFIED', 'PROPOSAL', 'WON', 'LOST']
@@ -22,7 +24,7 @@ export default async function PipelinePage() {
           <h1 className="page-title">Sales Pipeline</h1>
           <p className="page-subtitle" style={{ marginBottom: 0 }}>Drag and drop deals across stages.</p>
         </div>
-        <Link href="/pipeline/new" className="btn btn-primary">+ Add Deal</Link>
+        <CreateDealModal contacts={contacts} companies={companies} />
       </div>
 
       <KanbanClient groupedDeals={groupedDeals} stages={stages} />

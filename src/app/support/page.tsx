@@ -1,11 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import CreateTicketModal from './CreateTicketModal'
 
 export default async function SupportPage() {
-  const tickets = await prisma.ticket.findMany({
-    include: { contact: true },
-    orderBy: { createdAt: 'desc' }
-  })
+  const [tickets, contacts] = await Promise.all([
+    prisma.ticket.findMany({ include: { contact: true }, orderBy: { createdAt: 'desc' } }),
+    prisma.contact.findMany({ orderBy: { firstName: 'asc' } })
+  ])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -23,9 +24,7 @@ export default async function SupportPage() {
           <h1 className="page-title">Support Queue</h1>
           <p className="page-subtitle" style={{ marginBottom: 0 }}>Manage customer requests and issues.</p>
         </div>
-        <Link href="/support/new" className="btn btn-primary">
-          + New Ticket
-        </Link>
+        <CreateTicketModal contacts={contacts} />
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>

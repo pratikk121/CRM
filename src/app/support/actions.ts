@@ -13,3 +13,19 @@ export async function updateTicketStatus(ticketId: string, newStatus: string) {
   revalidatePath(`/support/${ticketId}`)
   revalidatePath('/support')
 }
+
+export async function createTicketAction(formData: FormData) {
+  const title = formData.get('title') as string
+  const description = formData.get('description') as string
+  const priority = formData.get('priority') as string
+  const contactId = (formData.get('contactId') as string) || null
+
+  if (!title) throw new Error("Title is strictly required.");
+
+  await prisma.ticket.create({
+    data: { title, description, priority, contactId, status: 'OPEN' }
+  })
+  
+  revalidatePath('/support')
+  revalidatePath('/') // Instantly update active dashboard ticket counters
+}

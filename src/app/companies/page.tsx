@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import CreateCompanyModal from './CreateCompanyModal'
 
 export default async function CompaniesPage() {
   const companies = await prisma.company.findMany({
@@ -13,9 +14,7 @@ export default async function CompaniesPage() {
           <h1 className="page-title">Companies</h1>
           <p className="page-subtitle" style={{ marginBottom: 0 }}>Manage your B2B accounts.</p>
         </div>
-        <Link href="/companies/new" className="btn btn-primary">
-          + Add Company
-        </Link>
+        <CreateCompanyModal />
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
