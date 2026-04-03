@@ -1,5 +1,7 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET || "fallback_secret_for_crm_beta_app_1234567890",
@@ -11,15 +13,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       authorize: async (credentials) => {
-        if (credentials?.email === "admin@crm.com" && credentials?.password === "admin") {
-          return { id: "1", name: "Admin Manager", email: "admin@crm.com", role: "ADMIN" };
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        let user = await prisma.user.findUnique({ 
+          where: { email: credentials.email as string } 
+        });
+        
+        // Auto-seed the master admin account on first login attempt to prevent cloud DB lockout
+        if (!user && credentials.email === "admin@crm.com" && credentials.password === "admin") {
+           const hashedPassword = await bcrypt.hash("admin", 10);
+           user = await prisma.user.create({
+             data: {
+               email: "admin@crm.com",
+               password: hashedPassword,
+               name: "System Admin",
+               role: "ADMIN"
+             }
+           });
         }
-        if (credentials?.email === "sales@crm.com" && credentials?.password === "sales") {
-          return { id: "2", name: "Sales Representative", email: "sales@crm.com", role: "SALES" };
+        
+        if (!user) return null;
+        
+        const passwordsMatch = await bcrypt.compare(credentials.password as string, user.password);
+        
+        if (passwordsMatch) {
+          return { id: user.id, name: user.name, email: user.email, role: user.role };
         }
-        if (credentials?.email === "support@crm.com" && credentials?.password === "support") {
-          return { id: "3", name: "Support Agent", email: "support@crm.com", role: "SUPPORT" };
-        }
+        
         return null;
       }
     })

@@ -43,6 +43,7 @@ export default async function RootLayout({
               <Link href="/pipeline" className="nav-link">Pipeline</Link>
               <Link href="/tasks" className="nav-link">Tasks</Link>
               <Link href="/support" className="nav-link">Support</Link>
+              <Link href="/settings" className="nav-link">Settings</Link>
               {(session.user as any)?.role === 'ADMIN' && (
                 <Link href="/admin" className="nav-link" style={{ marginTop: '1rem', color: 'var(--text-primary)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>⚙️ Admin Panel</Link>
               )}
