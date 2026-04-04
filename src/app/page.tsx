@@ -79,7 +79,7 @@ export default async function DashboardHome() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         <div className="card">
           <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Closed Revenue</h3>
-          <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary-color)', marginTop: '0.5rem', letterSpacing: '-0.03em' }}>
+          <p style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 700, color: 'var(--primary-color)', marginTop: '0.5rem', letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
@@ -103,9 +103,13 @@ export default async function DashboardHome() {
         
         {recentActivities.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📈</div>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)', opacity: 0.8 }}>
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
             <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--text-primary)' }}>No database activity detected yet.</p>
-            <p style={{ fontSize: '0.875rem' }}>Actions executed by your team across the platform will begin actively reporting here.</p>
+            <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>Actions executed by your team across the platform will begin actively reporting here.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
