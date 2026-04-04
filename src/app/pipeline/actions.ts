@@ -5,10 +5,16 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/auth'
 
 export async function updateDealStage(dealId: string, newStage: string) {
+  const session = await auth()
+  const userId = (session?.user as any)?.id
+  const isAdmin = (session?.user as any)?.role === 'ADMIN'
+
+  // Server-side strict ownership validation
   await prisma.deal.update({
-    where: { id: dealId },
+    where: isAdmin ? { id: dealId } : { id: dealId, userId: userId },
     data: { stage: newStage }
   })
+  
   // Revalidate the pipeline page to show the new data immediately
   revalidatePath('/pipeline')
 }
