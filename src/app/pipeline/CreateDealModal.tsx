@@ -24,7 +24,7 @@ export default function CreateDealModal({ contacts, companies }: { contacts: any
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="btn btn-primary" style={{ fontWeight: 600 }}>+ Add Deal</button>
+      <button onClick={() => setOpen(true)} className="btn btn-primary" style={{ fontWeight: 600, padding: '0.4rem 1rem', fontSize: '0.75rem' }}>+ Add Deal</button>
       {open && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="card" style={{ width: '100%', maxWidth: '450px', zIndex: 101, padding: '2rem' }}>

@@ -48,7 +48,7 @@ export default function KanbanClient({ groupedDeals, stages, contacts, companies
               {stage} ({groupedDeals[stage]?.length || 0})
             </h3>
             {stage === 'PROSPECT' && (
-               <div style={{ transform: 'scale(0.8)', transformOrigin: 'right center' }}>
+               <div>
                  <CreateDealModal contacts={contacts || []} companies={companies || []} />
                </div>
             )}
