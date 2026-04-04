@@ -4,11 +4,53 @@ import Link from "next/link"
 
 export const dynamic = 'force-dynamic';
 
+function ProgressBar({ percent, color }: { percent: number, color: string }) {
+  return (
+    <div style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '99px', height: '12px', marginTop: '1rem', overflow: 'hidden' }}>
+      <div style={{ width: `${percent}%`, height: '100%', backgroundColor: color, borderRadius: '99px', transition: 'width 1s ease-in-out' }} />
+    </div>
+  )
+}
+
+function RecentActivityList({ activities, emptyMessage }: { activities: any[], emptyMessage: string }) {
+  return (
+    <div className="card">
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Live Interaction Engine</h2>
+      {activities.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+          <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)', opacity: 0.8 }}>
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+          <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--text-primary)' }}>No database activity detected yet.</p>
+          <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>{emptyMessage}</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {activities.map((act: any) => (
+            <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                {act.type.charAt(0)}
+              </div>
+              <div>
+                <p style={{ fontWeight: 500, fontSize: '1.05rem' }}>{act.description}</p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  Triggered by {act.user?.name || 'System'} • {act.createdAt.toLocaleString()} {act.contact ? `• Subject: ${act.contact.firstName}` : ''}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default async function DashboardHome() {
   const session = await auth();
 
-  // If no session, intercept the database queries and return the stunning Public Landing Page!
-  if (!session) {
+  if (!session || !session.user?.email) {
     return (
       <div style={{ backgroundColor: '#050510', color: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <header style={{ padding: '1.5rem 3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -44,28 +86,117 @@ export default async function DashboardHome() {
     )
   }
 
-  // ==== PRISMA DASHBOARD AGGREGATIONS FOR AUTHENTICATED USERS ====
-  const [
-    wonDeals,
-    activeDealsCount,
-    openTicketsCount,
-    recentActivities
-  ] = await Promise.all([
-    prisma.deal.aggregate({ 
-      _sum: { value: true },
-      where: { stage: 'WON' } 
-    }),
-    prisma.deal.count({ 
-      where: { stage: { notIn: ['WON', 'LOST'] } } 
-    }),
-    prisma.ticket.count({ 
-      where: { status: { notIn: ['RESOLVED', 'CLOSED'] } } 
-    }),
-    prisma.activity.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: { contact: true, user: true }
-    })
+  // Look up user's exact roles and targets from Postgres
+  const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } })
+  if (!dbUser) return <div>User not found in mapping</div>
+
+  // ==========================================
+  // SALES SPECIFIC DASHBOARD
+  // ==========================================
+  if (dbUser.role === 'SALES') {
+    const [wonDeals, activeDealsCount, recentActivities] = await Promise.all([
+      prisma.deal.aggregate({ _sum: { value: true }, where: { stage: 'WON', userId: dbUser.id } }),
+      prisma.deal.count({ where: { stage: { notIn: ['WON', 'LOST'] }, userId: dbUser.id } }),
+      prisma.activity.findMany({ take: 5, orderBy: { createdAt: 'desc' }, where: { userId: dbUser.id }, include: { contact: true, user: true } })
+    ])
+    
+    const myRevenue = wonDeals._sum.value || 0;
+    const progressPercent = Math.min(100, (myRevenue / dbUser.monthlyTarget) * 100);
+
+    return (
+      <div>
+        <h1 className="page-title">My Performance</h1>
+        <p className="page-subtitle">Your personal sales targets and operational timeline.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <div className="card" style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+              <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Monthly Target Attainment</h3>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--success-color)' }}>{progressPercent.toFixed(1)}%</span>
+            </div>
+            <ProgressBar percent={progressPercent} color="var(--success-color)" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <span>${myRevenue.toLocaleString()} closed</span>
+              <span>Target: ${dbUser.monthlyTarget.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div className="card">
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>My Closed Revenue</h3>
+            <p style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 700, color: 'var(--primary-color)', marginTop: '0.5rem', letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              ${myRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div className="card">
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>My Pipeline Opportunities</h3>
+            <p style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.5rem', letterSpacing: '-0.03em' }}>
+              {activeDealsCount}
+            </p>
+          </div>
+        </div>
+        
+        <RecentActivityList activities={recentActivities} emptyMessage="Your prospect interactions and pipeline actions will construct your timeline here." />
+      </div>
+    )
+  }
+
+  // ==========================================
+  // SUPPORT SPECIFIC DASHBOARD
+  // ==========================================
+  if (dbUser.role === 'SUPPORT') {
+    const [resolvedTickets, openTicketsCount, recentActivities] = await Promise.all([
+      prisma.ticket.count({ where: { status: { in: ['RESOLVED', 'CLOSED'] }, userId: dbUser.id } }),
+      prisma.ticket.count({ where: { status: { notIn: ['RESOLVED', 'CLOSED'] }, userId: dbUser.id } }),
+      prisma.activity.findMany({ take: 5, orderBy: { createdAt: 'desc' }, where: { userId: dbUser.id }, include: { contact: true, user: true } })
+    ])
+
+    const progressPercent = Math.min(100, (resolvedTickets / dbUser.ticketTarget) * 100);
+
+    return (
+      <div>
+        <h1 className="page-title">Service Center</h1>
+        <p className="page-subtitle">Your personal resolution metrics and open escalations.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <div className="card" style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+              <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Target Resolutions</h3>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-color)' }}>{progressPercent.toFixed(1)}%</span>
+            </div>
+            <ProgressBar percent={progressPercent} color="var(--primary-color)" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <span>{resolvedTickets} Tickets Closed</span>
+              <span>Target: {dbUser.ticketTarget}</span>
+            </div>
+          </div>
+          
+          <div className="card">
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>My Resolved Tickets</h3>
+            <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary-color)', marginTop: '0.5rem', letterSpacing: '-0.03em' }}>
+              {resolvedTickets}
+            </p>
+          </div>
+          <div className="card" style={{ borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>My Open Tickets</h3>
+            <p style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.5rem', color: openTicketsCount > 0 ? 'var(--danger-color)' : 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+              {openTicketsCount}
+            </p>
+          </div>
+        </div>
+
+        <RecentActivityList activities={recentActivities} emptyMessage="Your resolved tickets and support logs will dynamically trace here." />
+      </div>
+    )
+  }
+
+  // ==========================================
+  // DEFAULT ADMIN HEADQUARTERS
+  // ==========================================
+  const [wonDeals, activeDealsCount, openTicketsCount, recentActivities] = await Promise.all([
+    prisma.deal.aggregate({ _sum: { value: true }, where: { stage: 'WON' } }),
+    prisma.deal.count({ where: { stage: { notIn: ['WON', 'LOST'] } } }),
+    prisma.ticket.count({ where: { status: { notIn: ['RESOLVED', 'CLOSED'] } } }),
+    prisma.activity.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { contact: true, user: true } })
   ])
 
   const totalRevenue = wonDeals._sum.value || 0;
@@ -75,60 +206,28 @@ export default async function DashboardHome() {
       <h1 className="page-title">Headquarters</h1>
       <p className="page-subtitle">Real-time database telemetry and global overview.</p>
 
-      {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         <div className="card">
-          <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Closed Revenue</h3>
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Global Closed Revenue</h3>
           <p style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 700, color: 'var(--primary-color)', marginTop: '0.5rem', letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
         <div className="card">
-          <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Active Pipeline Deals</h3>
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Global Pipeline Deals</h3>
           <p style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.5rem', letterSpacing: '-0.03em' }}>
             {activeDealsCount}
           </p>
         </div>
         <div className="card" style={{ borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Open High-Priority Tickets</h3>
-          <p style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.5rem', color: openTicketsCount > 0 ? 'var(--danger-color)' : 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase' }}>Global Open Tickets</h3>
+          <p style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.5rem', color: openTicketsCount > 0 ? 'var(--warning-color)' : 'var(--text-primary)', letterSpacing: '-0.03em' }}>
             {openTicketsCount}
           </p>
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="card">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Live Interaction Engine</h2>
-        
-        {recentActivities.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)', opacity: 0.8 }}>
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-              </svg>
-            </div>
-            <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--text-primary)' }}>No database activity detected yet.</p>
-            <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>Actions executed by your team across the platform will begin actively reporting here.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {recentActivities.map((act: any) => (
-              <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  {act.type.charAt(0)}
-                </div>
-                <div>
-                  <p style={{ fontWeight: 500, fontSize: '1.05rem' }}>{act.description}</p>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    Triggered by {act.user?.name || 'System'} • {act.createdAt.toLocaleString()} {act.contact ? `• Subject: ${act.contact.firstName}` : ''}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <RecentActivityList activities={recentActivities} emptyMessage="Actions executed by your team across the platform will begin actively reporting here." />
     </div>
   )
 }
