@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { addActivity } from '../actions'
+import CreateDealModal from '@/app/pipeline/CreateDealModal'
+import CreateTicketModal from '@/app/support/CreateTicketModal'
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -38,7 +40,9 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h2 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Related Deals</h2>
-              <Link href={`/pipeline/new?contactId=${contact.id}`} className="btn" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', border: '1px solid var(--border-color)' }}>+ Add</Link>
+              <div style={{ transform: 'scale(0.85)', transformOrigin: 'right center' }}>
+                <CreateDealModal contacts={[contact]} companies={contact.company ? [contact.company] : []} />
+              </div>
             </div>
             {contact.deals.length === 0 ? (
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>No active deals with this contact.</p>
@@ -56,7 +60,12 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
           {/* Related Tickets */}
           <div className="card">
-            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Support Tickets</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Support Tickets</h2>
+              <div style={{ transform: 'scale(0.85)', transformOrigin: 'right center' }}>
+                <CreateTicketModal contacts={[contact]} />
+              </div>
+            </div>
              {contact.tickets.length === 0 ? (
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>No support tickets created.</p>
             ) : (
