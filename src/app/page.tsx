@@ -192,14 +192,35 @@ export default async function DashboardHome() {
   // ==========================================
   // DEFAULT ADMIN HEADQUARTERS
   // ==========================================
-  const [wonDeals, activeDealsCount, openTicketsCount, recentActivities] = await Promise.all([
+  const [
+    wonDeals, 
+    activeDealsCount, 
+    openTicketsCount, 
+    recentActivities,
+    salesReps,
+    supportReps
+  ] = await Promise.all([
     prisma.deal.aggregate({ _sum: { value: true }, where: { stage: 'WON' } }),
     prisma.deal.count({ where: { stage: { notIn: ['WON', 'LOST'] } } }),
     prisma.ticket.count({ where: { status: { notIn: ['RESOLVED', 'CLOSED'] } } }),
-    prisma.activity.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { contact: true, user: true } })
+    prisma.activity.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { contact: true, user: true } }),
+    prisma.user.findMany({ where: { role: 'SALES' }, include: { deals: { where: { stage: 'WON' } } } }),
+    prisma.user.findMany({ where: { role: 'SUPPORT' }, include: { tickets: { where: { status: { in: ['RESOLVED', 'CLOSED'] } } } } })
   ])
 
   const totalRevenue = wonDeals._sum.value || 0;
+
+  const salesLeaderboard = salesReps.map(rep => {
+    const closedRevenue = rep.deals.reduce((sum, deal) => sum + (deal.value || 0), 0)
+    const progress = Math.min(100, (closedRevenue / rep.monthlyTarget) * 100)
+    return { ...rep, closedRevenue, progress }
+  }).sort((a, b) => b.closedRevenue - a.closedRevenue).slice(0, 5)
+
+  const supportLeaderboard = supportReps.map(rep => {
+    const resolvedTickets = rep.tickets.length
+    const progress = Math.min(100, (resolvedTickets / rep.ticketTarget) * 100)
+    return { ...rep, resolvedTickets, progress }
+  }).sort((a, b) => b.resolvedTickets - a.resolvedTickets).slice(0, 5)
 
   return (
     <div>
@@ -224,6 +245,58 @@ export default async function DashboardHome() {
           <p style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.5rem', color: openTicketsCount > 0 ? 'var(--warning-color)' : 'var(--text-primary)', letterSpacing: '-0.03em' }}>
             {openTicketsCount}
           </p>
+        </div>
+      </div>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🏆</span>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Sales Titans</h2>
+          </div>
+          {salesLeaderboard.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>No active sales tracked.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {salesLeaderboard.map((rep, idx) => (
+                <div key={rep.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontWeight: 700, color: idx === 0 ? 'var(--warning-color)' : 'var(--text-secondary)' }}>#{idx + 1}</span>
+                      <span style={{ fontWeight: 600 }}>{rep.name || rep.email?.split('@')[0]}</span>
+                    </div>
+                    <span style={{ fontWeight: 700, color: 'var(--success-color)' }}>${rep.closedRevenue.toLocaleString()}</span>
+                  </div>
+                  <ProgressBar percent={rep.progress} color="var(--success-color)" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🛡️</span>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Resolution Leaders</h2>
+          </div>
+          {supportLeaderboard.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>No support stats tracked.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {supportLeaderboard.map((rep, idx) => (
+                <div key={rep.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontWeight: 700, color: idx === 0 ? 'var(--warning-color)' : 'var(--text-secondary)' }}>#{idx + 1}</span>
+                      <span style={{ fontWeight: 600 }}>{rep.name || rep.email?.split('@')[0]}</span>
+                    </div>
+                    <span style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{rep.resolvedTickets} closed</span>
+                  </div>
+                  <ProgressBar percent={rep.progress} color="var(--primary-color)" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
