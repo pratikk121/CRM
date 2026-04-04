@@ -26,12 +26,14 @@ export default async function PipelinePage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="page-title">Sales Pipeline</h1>
           <p className="page-subtitle" style={{ marginBottom: 0 }}>Drag and drop deals across stages.</p>
         </div>
-        <CreateDealModal contacts={contacts} companies={companies} />
+        <div>
+          <CreateDealModal contacts={contacts} companies={companies} />
+        </div>
       </div>
 
       <KanbanClient groupedDeals={groupedDeals} stages={stages} />
