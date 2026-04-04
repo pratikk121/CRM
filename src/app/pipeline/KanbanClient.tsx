@@ -2,8 +2,9 @@
 
 import { updateDealStage } from './actions'
 import { useTransition } from 'react'
+import CreateDealModal from './CreateDealModal'
 
-export default function KanbanClient({ groupedDeals, stages }: { groupedDeals: Record<string, any[]>, stages: string[] }) {
+export default function KanbanClient({ groupedDeals, stages, contacts, companies }: { groupedDeals: Record<string, any[]>, stages: string[], contacts: any[], companies: any[] }) {
   const [isPending, startTransition] = useTransition()
   
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, dealId: string) => {
@@ -42,11 +43,18 @@ export default function KanbanClient({ groupedDeals, stages }: { groupedDeals: R
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
-          <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>
-            {stage} ({groupedDeals[stage].length})
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              {stage} ({groupedDeals[stage]?.length || 0})
+            </h3>
+            {stage === 'PROSPECT' && (
+               <div style={{ transform: 'scale(0.8)', transformOrigin: 'right center' }}>
+                 <CreateDealModal contacts={contacts || []} companies={companies || []} />
+               </div>
+            )}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: '50px' }}>
-            {groupedDeals[stage].map((deal: any) => (
+            {(groupedDeals[stage] || []).map((deal: any) => (
               <div 
                 key={deal.id} 
                 draggable 

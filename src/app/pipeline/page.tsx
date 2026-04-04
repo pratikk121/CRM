@@ -36,7 +36,7 @@ export default async function PipelinePage() {
         </div>
       </div>
 
-      <KanbanClient groupedDeals={groupedDeals} stages={stages} />
+      <KanbanClient groupedDeals={groupedDeals} stages={stages} contacts={contacts} companies={companies} />
     </div>
   )
 }

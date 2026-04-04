@@ -39,12 +39,12 @@ export default function CreateDealModal({ contacts, companies }: { contacts: any
                  <div><label style={{ fontSize: '0.8rem', marginBottom: '0.25rem', display: 'block', color: 'var(--text-secondary)' }}>Account</label>
                    <select name="companyId" style={{ width: '100%' }}>
                      <option value="">-- No Account --</option>
-                     {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                     {(companies || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                    </select></div>
                  <div><label style={{ fontSize: '0.8rem', marginBottom: '0.25rem', display: 'block', color: 'var(--text-secondary)' }}>Contact</label>
                    <select name="contactId" style={{ width: '100%' }}>
                      <option value="">-- No Contact --</option>
-                     {contacts.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
+                     {(contacts || []).map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
                    </select></div>
                </div>
                <button type="submit" disabled={loading} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>Inject Deal</button>
