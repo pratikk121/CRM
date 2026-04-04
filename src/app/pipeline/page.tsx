@@ -12,7 +12,11 @@ export default async function PipelinePage() {
   }
 
   const [deals, contacts, companies] = await Promise.all([
-    prisma.deal.findMany({ include: { company: true, contact: true }, orderBy: { createdAt: 'desc' } }),
+    prisma.deal.findMany({ 
+      where: (session?.user as any)?.role === 'ADMIN' ? {} : { userId: session?.user?.id },
+      include: { company: true, contact: true }, 
+      orderBy: { createdAt: 'desc' } 
+    }),
     prisma.contact.findMany({ orderBy: { firstName: 'asc' } }),
     prisma.company.findMany({ orderBy: { name: 'asc' } })
   ])

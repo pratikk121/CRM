@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { auth } from '@/auth'
 
 export async function updateDealStage(dealId: string, newStage: string) {
   await prisma.deal.update({
@@ -13,6 +14,7 @@ export async function updateDealStage(dealId: string, newStage: string) {
 }
 
 export async function createDealAction(formData: FormData) {
+  const session = await auth()
   const title = formData.get('title') as string
   const value = parseFloat(formData.get('value') as string) || 0
   const companyId = (formData.get('companyId') as string) || null
@@ -21,7 +23,7 @@ export async function createDealAction(formData: FormData) {
   if (!title) throw new Error("Title is strictly required.");
 
   await prisma.deal.create({
-    data: { title, value, companyId, contactId, stage: 'PROSPECT' }
+    data: { title, value, companyId, contactId, stage: 'PROSPECT', userId: session?.user?.id || null }
   })
   
   revalidatePath('/pipeline')
