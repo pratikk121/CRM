@@ -44,10 +44,12 @@ export default async function RootLayout({
             </header>
             <nav className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
               <Link href="/" className="nav-link">Dashboard</Link>
-              <Link href="/contacts" className="nav-link">Contacts</Link>
-              <Link href="/companies" className="nav-link">Companies</Link>
               {((session.user as any)?.role !== 'SUPPORT') && (
-                <Link href="/pipeline" className="nav-link">Pipeline</Link>
+                <>
+                  <Link href="/contacts" className="nav-link">Contacts</Link>
+                  <Link href="/companies" className="nav-link">Companies</Link>
+                  <Link href="/pipeline" className="nav-link">Pipeline</Link>
+                </>
               )}
               <Link href="/tasks" className="nav-link">Tasks</Link>
               <Link href="/support" className="nav-link">Support</Link>
