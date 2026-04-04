@@ -117,8 +117,11 @@ button { cursor: pointer; font-family: inherit; }
 .main-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 2.5rem;
   position: relative;
+  min-width: 0; /* Prevents flex cascade from expanding past viewport */
+  max-width: 100%;
 }
 
 /* Glassmorphic Cards */

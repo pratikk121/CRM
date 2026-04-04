@@ -66,7 +66,7 @@ export default async function RootLayout({
             </div>
           </aside>
           
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: 0 }}>
             <header className="top-header">
               <div style={{ fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                  Welcome back, {session.user?.name || 'Admin'}
